@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Tue Mar 26 13:26:22 EDT 2019:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.12.1.1 - (1704137): instance a816c00e-0169-bb09-e943-0000104c5848 
+on database directory /Users/zihaoguo/Documents/nyu/ds1004/lab-3-spark-Zihao-Roy/metastore_db with class loader sun.misc.Launcher$AppClassLoader@76ccd017 
+Loaded from file:/Users/zihaoguo/anaconda3/lib/python3.6/site-packages/pyspark/jars/derby-10.12.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_65-b17
+user.dir=/Users/zihaoguo/Documents/nyu/ds1004/lab-3-spark-Zihao-Roy
+os.name=Mac OS X
+os.arch=x86_64
+os.version=10.14.3
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

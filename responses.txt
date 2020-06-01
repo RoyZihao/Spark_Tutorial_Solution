@@ -1,0 +1,166 @@
+Please enter your spark code as a response to each question listed below. Remember to provide your output as well.
+
+
+Question 1: 
+How would you express the following computation using SQL instead of the object interface: sailors.filter(sailors.age > 30).select(sailors.sname)
+
+Response:
+#write spark code here
+result1 = spark.sql('SELECT sname FROM sailors WHERE age > 30')
+
+
+
+
+Question 2: How would you express the following using the object interface instead of SQL: spark.sql('SELECT * from reserves WHERE sid != 22')
+
+Response:
+#write spark code here
+result2 = reserves.filter(reserves.sid != 22)
+
+
+
+
+Question 3: Using SQL and (multiple) inner joins, in a single query, how many distinct boats did each sailor reserve? The resulting DataFrame should include the sailor's id, name, and the count of distinct boats. (Hint: you may need to use first(...) aggregation function on some columns.) Provide both your query and the resulting DataFrame in your response to this question.
+
+Response:
+#write spark code here
+result3 = spark.sql('SELECT sailors.sid, first(sailors.sname), COUNT(DISTINCT reserves.bid) FROM sailors INNER JOIN reserves ON sailors.sid = reserves.sid INNER JOIN boats ON reserves.bid = boats.bid GROUP BY sailors.sid')
+
++-----------------+-------------------+-------------------+
+|first(sid, false)|first(sname, false)|count(DISTINCT bid)|
++-----------------+-------------------+-------------------+
+|               22|            dusting|                  4|
+|               31|             lubber|                  3|
+|               74|            horatio|                  1|
+|               64|            horatio|                  2|
++-----------------+-------------------+-------------------+
+
+
+
+Question 4: Repeating the analysis from Lab2, implement a query using Spark which finds for each artist ID, the maximum track year, average track duration, and number of terms applied to the artist. What are the results for the ten artists with the longest average track durations? Include both your query code and resulting DataFrame in your response.
+
+Response:
+#write spark code here
+tracks = spark.read.csv('tracks.csv', schema = 'trackID STRING, title STRING, release STRING, year INT, duration FLOAT, artistID STRING')
+
+artist_term = spark.read.csv('artist_term.csv', schema = 'artistID STRING, term STRING' )
+
+result4 = spark.sql('SELECT artist_term.artistID, MAX(year), AVG(duration), COUNT(DISTINCT term) FROM artist_term INNER JOIN tracks ON artist_term.artistID = tracks.artistID GROUP BY artist_term.artistID ORDER BY AVG(duration) DESC LIMIT 10')
+
++------------------+---------+-----------------+--------------------+           
+|          artistID|max(year)|    avg(duration)|count(DISTINCT term)|
++------------------+---------+-----------------+--------------------+
+|ARIAXFE11F50C50923|        0|3026.572509765625|                   1|
+|ARIV4271187B9B824F|        0|3025.175048828125|                   8|
+|ARBNOH41187FB5B059|        0|3024.613525390625|                   7|
+|ARBTWFL122988F01AF|        0| 3022.28857421875|                   1|
+|ARYDSAU1187FB39228|        0| 3007.47705078125|                   4|
+|ARUV9R01187FB3A240|        0|  3006.5888671875|                  19|
+|ARX2AL51187B98979E|        0|3000.842041015625|                   9|
+|ARBLRK21187B98CF16|        0|2996.035400390625|                  14|
+|ARKZAWC1187FB554BE|        0|2987.754638671875|                   3|
+|ARGOPFA11F4C84679F|        0|2973.256591796875|                   8|
++------------------+---------+-----------------+--------------------+
+
+
+
+Question 5: Create a query that finds the number of distinct tracks associated (through artistID) to each term. Modify this query to return only the top 10 most popular terms, and again for the bottom 10. Include each query in your response. What are the 10 most and least popular terms?
+
+Response:
+#write spark code here
+result51 = spark.sql('SELECT term, COUNT(DISTINCT trackID) FROM artist_term INNER JOIN tracks ON artist_term.artistID = tracks.artistID GROUP BY artist_term.term ORDER BY COUNT(DISTINCT trackID) DESC LIMIT 10')
+
++----------------+-----------------------+                                      
+|            term|count(DISTINCT trackID)|
++----------------+-----------------------+
+|            rock|                  86469|
+|      electronic|                  69971|
+|             pop|                  68682|
+|alternative rock|                  44282|
+|         hip hop|                  42888|
+|            jazz|                  42358|
+|   united states|                  40870|
+|     alternative|                  37361|
+|        pop rock|                  35589|
+|           indie|                  34873|
++----------------+-----------------------+
+
+result52 = spark.sql('SELECT term, COUNT(DISTINCT trackID) FROM artist_term INNER JOIN tracks ON artist_term.artistID = tracks.artistID GROUP BY artist_term.term ORDER BY COUNT(DISTINCT trackID) LIMIT 10')
+
++--------------------+-----------------------+                                  
+|                term|count(DISTINCT trackID)|
++--------------------+-----------------------+
+|      oh map records|                      1|
+|            canberra|                      1|
+|          heavy funk|                      1|
+|        guitar music|                      1|
+|            szczecin|                      1|
+|     gabber hardcore|                      1|
+|     american indian|                      1|
+|christraping blac...|                      1|
+|          azerbaijan|                      1|
+|             carioca|                      1|
++--------------------+-----------------------+
+
+Question 6: Repeat questions 4 and 5, but now using the large versions of the CSV files stored at hdfs:/user/bm106/pub/artist_term_large.csv and hdfs:/user/bm106/pub/tracks_large.csv. Report the resulting DataFrames in your response. Did you have to change any of your analysis code, and if so, what?
+
+Response:
+#write spark code here
+artist_term = spark.read.csv('hdfs:/user/bm106/pub/artist_term_large.csv', schema = 'artistID STRING, term STRING' )
+
+tracks = spark.read.csv('hdfs:/user/bm106/pub/tracks_large.csv', schema = 'trackID STRING, title STRING, release STRING, year INT, duration FLOAT, artistID STRING')
+
+# Repeat question 4
+result64 = spark.sql('SELECT artist_term.artistID, MAX(year), AVG(duration), COUNT(DISTINCT term) FROM artist_term INNER JOIN tracks ON artist_term.artistID = tracks.artistID GROUP BY artist_term.artistID ORDER BY AVG(duration) DESC LIMIT 10')
+
++------------------+---------+-----------------+--------------------+           
+|          artistID|max(year)|    avg(duration)|count(DISTINCT term)|
++------------------+---------+-----------------+--------------------+
+|ARI4ARP1187FB50847|        0| 3032.50244140625|                  13|
+|ARKIGPF1187B98BD79|        0|3030.908935546875|                  15|
+|ARG62WR1187FB461BC|        0|3030.177490234375|                   9|
+|ARNHB3M1187B98B512|        0|3029.080322265625|                  12|
+|ARMDCV21187B9B13AD|        0|3027.721923828125|                  17|
+|ARIAXFE11F50C50923|        0|3026.572509765625|                   2|
+|ARIV4271187B9B824F|        0|3025.175048828125|                  18|
+|AR8XMK11187B9AF8C7|     2005|3024.665771484375|                  24|
+|ARBNOH41187FB5B059|        0|3024.613525390625|                  11|
+|ARBTWFL122988F01AF|        0| 3022.28857421875|                   2|
++------------------+---------+-----------------+--------------------+
+
+#Repeat question 5
+result651 = spark.sql('SELECT term, COUNT(DISTINCT trackID) FROM artist_term INNER JOIN tracks ON artist_term.artistID = tracks.artistID GROUP BY artist_term.term ORDER BY COUNT(DISTINCT trackID) DESC LIMIT 10')
+
++----------------+-----------------------+                                      
+|            term|count(DISTINCT trackID)|
++----------------+-----------------------+
+|            rock|                 610884|
+|      electronic|                 484208|
+|             pop|                 474863|
+|alternative rock|                 320506|
+|            jazz|                 301223|
+|         hip hop|                 295101|
+|   united states|                 287360|
+|     alternative|                 262573|
+|        pop rock|                 248072|
+|           indie|                 242083|
++----------------+-----------------------+
+
+result652 = spark.sql('SELECT term, COUNT(DISTINCT trackID) FROM artist_term INNER JOIN tracks ON artist_term.artistID = tracks.artistID GROUP BY artist_term.term ORDER BY COUNT(DISTINCT trackID) LIMIT 10')
+
++--------------------+-----------------------+                                  
+|                term|count(DISTINCT trackID)|
++--------------------+-----------------------+
+|         rock gospel|                      1|
+|         girlysounds|                      1|
+|       houston scene|                      1|
+|         noble label|                      1|
+|        cabaret punk|                      1|
+|             joensuu|                      1|
+|            bandolim|                      1|
+|     milled pavement|                      1|
+|        estrado 2008|                      1|
+|metal from puerto...|                      1|
++--------------------+-----------------------+
+
+We don't have to change any code in our sql query. However, if you don't want to overwrite the previous smaller dataset analysis, you might want to change the name of the relations. Otherwise, the logic is the same and doesn't need change the previous code. 
